@@ -38,7 +38,6 @@ class Client(object):
             self._cursor = self.connection.cursor()
         return self._cursor
 
-    @property
     def scalar(self):
         if len(self._result_rows) > 0:
             return self._result_rows[0][0]
@@ -46,15 +45,12 @@ class Client(object):
         else:
             return None
 
-    @property
     def lastid(self):
         return self._lastrowid
 
-    @property
     def rowcount(self):
         return self._rowcount
 
-    @property
     def first(self):
         if len(self._result_rows) > 0:
             return RD(dict(zip(self._result_cols, self._result_rows[0])))
@@ -62,7 +58,6 @@ class Client(object):
         else:
             return None
 
-    @property
     def all(self):
         return RL([dict(zip(self._result_cols, r)) for r in self._result_rows])
 
