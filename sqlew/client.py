@@ -58,10 +58,13 @@ class Client(object):
 
     def exe(self, fmt, **kwargs):
         self.cursor().execute(qformat(fmt, **kwargs))
-        self._result_cols = [c[0] for c in self.cursor().description]
-        self._result_rows = [r for r in self.cursor()]
         self._lastrowid = self.cursor().lastrowid
         self._rowcount = self.cursor().rowcount
+
+        desc = self.cursor().description
+        if desc is not None:
+            self._result_cols = [c[0] for c in desc]
+            self._result_rows = [r for r in self.cursor()]
 
         if self._autoclose:
             self.close()
