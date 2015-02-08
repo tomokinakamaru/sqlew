@@ -6,12 +6,10 @@ from .restructables import RestructableList as RL, RestructableDict as RD
 
 class Client(object):
     def __init__(self, dbapi, **kwargs):
-        self.nocommit = False
-
         self._dbapi = dbapi
         self._config = kwargs
 
-        self._autoclose = True
+        self._close_after_exe = True
 
         self._connection = None
         self._cursor = None
@@ -21,9 +19,8 @@ class Client(object):
         self._lastrowid = None
         self._rowcount = None
 
-    @property
     def noclose(self):
-        self._autoclose = False
+        self._close_after_exe = False
         return self
 
     def connection(self):
@@ -36,13 +33,20 @@ class Client(object):
             self._cursor = self.connection().cursor()
         return self._cursor
 
-    def commit(self):
-        if not self.nocommit:
-            self.connection().commit()
+    def commit(self, close=True):
+        self.connection().commit()
+
+        if close:
+            self.close()
+
         return self
 
-    def rollback(self):
+    def rollback(self, close=True):
         self.connection().rollback()
+
+        if close:
+            self.close()
+
         return self
 
     def close(self):
@@ -61,16 +65,14 @@ class Client(object):
         self._lastrowid = self.cursor().lastrowid
         self._rowcount = self.cursor().rowcount
 
-        desc = self.cursor().description
-        if desc is not None:
-            self._result_cols = [c[0] for c in desc]
-            self._result_rows = [r for r in self.cursor()]
+        self._result_cols = [c[0] for c in self.cursor().description or []]
+        self._result_rows = [r for r in self.cursor()]
 
-        if self._autoclose:
+        if self._close_after_exe:
             self.close()
 
         else:
-            self._autoclose = True
+            self._close_after_exe = True
 
         return self
 
