@@ -3,14 +3,23 @@
 import re
 from datetime import datetime
 
-PLACEHOLDER = re.compile(r'{(.*?)}')
-RAW_PLACEHOLDER = re.compile(r'{{(.*?)}}')
+PLACEHOLDER = re.compile(r'.:+[0-9a-zA-Z_]+')
 
 
 def qformat(fmt, **kwargs):
-    ph = lambda m: escape(kwargs[m.group(1)])
-    rph = lambda m: str(kwargs[m.group(1)])
-    return PLACEHOLDER.sub(ph, RAW_PLACEHOLDER.sub(rph, fmt))
+    def _(m):
+        g = m.group(0)
+        pre, key = g[0], g[1:]
+
+        if pre == '\\':
+            return key
+
+        else:
+            v = kwargs[key.lstrip(':')]
+            v = str(v) if key.startswith('::') else escape(v)
+            return pre + v
+
+    return PLACEHOLDER.sub(_, fmt)
 
 
 def escape(v):
