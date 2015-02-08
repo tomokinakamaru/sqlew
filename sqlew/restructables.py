@@ -32,7 +32,7 @@ class RestructableList(list):
         return self.process(_mkdict(**rules))
 
 
-class RestructableDict(list):
+class RestructableDict(dict):
     def process(self, f):
         f(self)
         return self
