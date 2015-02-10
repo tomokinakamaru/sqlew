@@ -9,8 +9,6 @@ class Client(object):
         self._dbapi = dbapi
         self._config = kwargs
 
-        self._close_after_exe = True
-
         self._connection = None
         self._cursor = None
 
@@ -18,10 +16,6 @@ class Client(object):
         self._result_rows = None
         self._lastrowid = None
         self._rowcount = None
-
-    def noclose(self):
-        self._close_after_exe = False
-        return self
 
     def connection(self):
         if self._connection is None:
@@ -60,7 +54,13 @@ class Client(object):
 
         return self
 
-    def exe(self, fmt, **kwargs):
+    def exes(self, fmt, **kwargs):
+        return self.exe(True, fmt, **kwargs)
+
+    def exew(self, fmt, **kwargs):
+        return self.exe(False, fmt, **kwargs)
+
+    def exe(self, strong, fmt, **kwargs):
         self.cursor().execute(qformat(fmt, **kwargs))
         self._lastrowid = self.cursor().lastrowid
         self._rowcount = self.cursor().rowcount
@@ -68,11 +68,8 @@ class Client(object):
         self._result_cols = [c[0] for c in self.cursor().description or []]
         self._result_rows = [r for r in self.cursor()]
 
-        if self._close_after_exe:
+        if not strong:
             self.close()
-
-        else:
-            self._close_after_exe = True
 
         return self
 
