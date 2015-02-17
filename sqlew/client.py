@@ -61,17 +61,24 @@ class Client(object):
         return self.exe(False, fmt, **kwargs)
 
     def exe(self, strong, fmt, **kwargs):
-        self.cursor().execute(qformat(fmt, **kwargs))
-        self._lastrowid = self.cursor().lastrowid
-        self._rowcount = self.cursor().rowcount
+        try:
+            self.cursor().execute(qformat(fmt, **kwargs))
 
-        self._result_cols = [c[0] for c in self.cursor().description or []]
-        self._result_rows = [r for r in self.cursor()]
-
-        if not strong:
+        except Exception as e:
             self.close()
+            raise e
 
-        return self
+        else:
+            self._lastrowid = self.cursor().lastrowid
+            self._rowcount = self.cursor().rowcount
+
+            self._result_cols = [c[0] for c in self.cursor().description or []]
+            self._result_rows = [r for r in self.cursor()]
+
+            if not strong:
+                self.close()
+
+            return self
 
     def scalar(self):
         if len(self._result_rows) > 0:
