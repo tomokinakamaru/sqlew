@@ -7,7 +7,7 @@ class Storage(dict):
     def load(self, path):
         for f in self._load(path):
             with open(f, 'r') as fp:
-                key = f[len(path):].lstrip('/').rstrip('.sql')
+                key = f[len(path):].lstrip('/')[:-4]
                 self[key] = self._make_compact(fp.read())
 
     def _load(self, path):
