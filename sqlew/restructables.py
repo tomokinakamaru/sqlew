@@ -3,7 +3,12 @@
 
 def _mklist(key, separator):
     def _(e):
-        e[key] = e[key].split(separator)
+        if e[key] is not None:
+            e[key] = e[key].split(separator)
+
+        else:
+            e[key] = []
+
     return _
 
 
@@ -13,7 +18,7 @@ def _mkdict(**rules):
             keypath = tokey.split('.')
             head = e
             for k in keypath[:-1]:
-                head = head.setdefault(k, {})
+                head = head.setdefault(k, RestructableDict())
             head[keypath[-1]] = e[fromkey]
             del e[fromkey]
     return _
