@@ -108,4 +108,6 @@ class Client(object):
             return None
 
     def all(self):
-        return RL([dict(zip(self._result_cols, r)) for r in self._result_rows])
+        return RL([
+            RD(dict(zip(self._result_cols, r))) for r in self._result_rows
+        ])
