@@ -2,6 +2,7 @@
 
 import re
 from datetime import datetime
+from .exceptions import QueryFormatError
 
 PLACEHOLDER = re.compile(r'.:+[0-9a-zA-Z_]+')
 
@@ -19,7 +20,11 @@ def qformat(fmt, **kwargs):
             v = str(v) if key.startswith('::') else escape(v)
             return pre + v
 
-    return PLACEHOLDER.sub(_, fmt)
+    try:
+        return PLACEHOLDER.sub(_, fmt)
+
+    except KeyError as e:
+        raise QueryFormatError(str(e))
 
 
 def escape(v):

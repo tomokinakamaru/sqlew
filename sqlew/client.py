@@ -6,6 +6,8 @@ from .restructables import RestructableList as RL, RestructableDict as RD
 
 class Client(object):
     def __init__(self, dbapi, **kwargs):
+        self.query_log = False
+
         self._dbapi = dbapi
         self._config = kwargs
 
@@ -61,8 +63,13 @@ class Client(object):
         return self.exe(False, fmt, **kwargs)
 
     def exe(self, strong, fmt, **kwargs):
+        q = qformat(fmt, **kwargs)
+
+        if self.query_log:
+            print('sqlew: {}'.format(q))
+
         try:
-            self.cursor().execute(qformat(fmt, **kwargs))
+            self.cursor().execute(q)
 
         except Exception as e:
             self.close()
@@ -101,4 +108,6 @@ class Client(object):
             return None
 
     def all(self):
-        return RL([dict(zip(self._result_cols, r)) for r in self._result_rows])
+        return RL([
+            RD(dict(zip(self._result_cols, r))) for r in self._result_rows
+        ])
