@@ -1,7 +1,8 @@
 # coding:utf-8
 
 from .formatting import qformat
-from .restructables import RestructableList as RL, RestructableDict as RD
+from .restructables import (RestructableList as RL,
+                            RestructableDict as RD)
 
 
 class Client(object):
@@ -18,6 +19,12 @@ class Client(object):
         self._result_rows = None
         self._lastrowid = None
         self._rowcount = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, typ, val, tb):
+        self.close()
 
     def connection(self):
         if self._connection is None:
