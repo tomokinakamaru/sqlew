@@ -1,6 +1,6 @@
 # coding:utf-8
 
-from .formatting import qformat
+from .formatting import qbind
 from .restructables import (RestructableList as RL,
                             RestructableDict as RD)
 
@@ -70,7 +70,7 @@ class Client(object):
         return self.exe(False, fmt, **kwargs)
 
     def exe(self, strong, fmt, **kwargs):
-        q = qformat(fmt, **kwargs)
+        q = qbind(fmt, **kwargs)
 
         if self.query_log:
             print('sqlew: {}'.format(q))
