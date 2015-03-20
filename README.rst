@@ -1,4 +1,4 @@
 sqlew
 =====
 
-DB client
+PEP 249 compat DB Client & query formatting.
