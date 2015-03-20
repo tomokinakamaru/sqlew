@@ -1,6 +1,7 @@
 # coding:utf-8
 
-from .formatting import qbind
+from .exceptions import UnacceptableResultError
+from .queryformat import qformat
 from .restructables import (RestructableList as RL,
                             RestructableDict as RD)
 
@@ -70,7 +71,7 @@ class Client(object):
         return self.exe(False, fmt, **kwargs)
 
     def exe(self, strong, fmt, **kwargs):
-        q = qbind(fmt, **kwargs)
+        q = qformat(fmt, **kwargs)
 
         if self.query_log:
             print('sqlew: {}'.format(q))
@@ -94,27 +95,36 @@ class Client(object):
 
             return self
 
-    def scalar(self):
+    def scalar(self, allow_none=True):
         if len(self._result_rows) > 0:
             return self._result_rows[0][0]
 
         else:
-            return None
+            return None if allow_none else self._unacceptable_result()
 
-    def lastid(self):
-        return self._lastrowid
+    def lastid(self, allow_none=True):
+        return self._lastrowid if allow_none else self._unacceptable_result()
 
-    def rowcount(self):
-        return self._rowcount
+    def rowcount(self, allow_none=True):
+        return self._rowcount if allow_none else self._unacceptable_result()
 
-    def first(self):
+    def first(self, allow_none=True):
         if len(self._result_rows) > 0:
             return RD(dict(zip(self._result_cols, self._result_rows[0])))
 
         else:
-            return None
+            return None if allow_none else self._unacceptable_result()
 
-    def all(self):
-        return RL([
+    def all(self, allow_empty=True):
+        r = RL([
             RD(dict(zip(self._result_cols, r))) for r in self._result_rows
         ])
+
+        if 0 < len(r):
+            return r
+
+        else:
+            return [] if allow_none else self._unacceptable_result()
+
+    def _unacceptable_result(self):
+        raise UnacceptableResultError()
