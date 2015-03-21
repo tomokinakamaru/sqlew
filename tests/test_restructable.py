@@ -2,51 +2,26 @@
 
 import pytest
 import sqlite3
-from sqlew import Client
+from sqlew.restructables import (RestructableDict as RD,
+                                 RestructableList as RL)
 
 
-dbc = Client(sqlite3, database='tests/test_db.db')
+def test_nest_dict():
+    rl = RL([RD({'a': 1, 'b': 100, 'c_x': 10, 'c_y': 20})])
+    assert rl.nest('c') == [{'a': 1, 'b': 100, 'c': {'x': 10, 'y': 20}}]
+
+    rl = RL([RD({'a': 1, 'b': 100})])
+    assert rl.nest_dict('x', {'a': '-', 'b': '+'}) == [{'x': {'-': 1,
+                                                              '+': 100}}]
 
 
-def clear_table():
-    dbc.exew('DROP TABLE IF EXISTS test')
-    dbc.exew('CREATE TABLE test (id integer primary key, name test)')
+def test_nest_list():
+    rl = RL([RD({'a_x': '1,2', 'a_y': '4,5'})])
+    assert rl.nest('a', ',') == [{'a': [{'x': '1', 'y': '4'},
+                                        {'x': '2', 'y': '5'}]}]
 
 
-def test_split():
-    clear_table()
-    dbc.exes("INSERT INTO test (name) VALUES (NULL)").commit()
-    r = dbc.exew('SELECT * FROM test LIMIT 1').all()
-    assert r.split('name') == [{'id': 1, 'name': []}]
-
-    clear_table()
-    dbc.exes("INSERT INTO test (name) VALUES ('aaa,bbb,ccc')").commit()
-    r = dbc.exew('SELECT * FROM test LIMIT 1').all()
-    assert r.split('name') == [{'id': 1, 'name': ['aaa', 'bbb', 'ccc']}]
-
-
-def test_form():
-    clear_table()
-    dbc.exes("INSERT INTO test (name) VALUES ('xxx')").commit()
-
-    r = dbc.exew('SELECT id, name as x_name FROM test').all()
-    assert r.form('x_', 'x') == [{'id': 1, 'x': {'name': 'xxx'}}]
-
-    r = dbc.exew('SELECT id, name FROM test').all()
-    assert r.form_one('name', 'x.name') == [{'id': 1, 'x': {'name': 'xxx'}}]
-    r = dbc.exew('SELECT id, name FROM test').all()
-    print r.form_one('name', 'x.name')
-    print r.form_one('x.name', 'name')
-    assert r == [{'id': 1, 'name': 'xxx', 'x': {}}]
-
-
-def test_transpose():
-    clear_table()
-    dbc.exes("INSERT INTO test (name) VALUES ('aaa,bbb')").commit()
-
-    r = dbc.exew("""SELECT id, name AS x_name, '123,456' as x_id
-                    FROM test""").all()
-    r.form('x_', 'x').transpose('x')
-    assert r == [{'id': 1,
-                  'x': [{'name': 'aaa', 'id': '123'},
-                        {'name': 'bbb', 'id': '456'}]}]
+def test_a():
+    rl = RL([RD({'x': '1,2'})])
+    print('-- rl --', rl)
+    assert rl.nest_list('a', {'x': '*'}) == [{'a': [{'*': '1'}, {'*': '2'}]}]
