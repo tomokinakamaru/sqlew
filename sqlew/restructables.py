@@ -71,7 +71,7 @@ class RestructableList(list):
 
         return self
 
-    def transform(self, key, separator=','):
+    def transpose(self, key, separator=','):
         for e in self:
             e.transpose(key, separator)
 

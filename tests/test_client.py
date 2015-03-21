@@ -6,39 +6,92 @@ from sqlew import Client
 from sqlew.exceptions import UnacceptableResultError
 
 dbc = Client(sqlite3, database='tests/test_db.db')
+dbc.exew('DROP TABLE IF EXISTS test')
+dbc.exew('CREATE TABLE test (id integer primary key, name test)')
 
 
-def test_scalar():
-    dbc.query_log = True
-    assert dbc.exew('SELECT 1').scalar() == 1
+def clear_table():
+    dbc.exew('DROP TABLE IF EXISTS test')
+    dbc.exew('CREATE TABLE test (id integer primary key, name test)')
 
 
 def test_with():
     with dbc as d:
-        assert d.exew('SELECT 1').scalar() == 1
+        d.exew('SELECT 1')
+
+
+def test_rollback():
+    clear_table()
+
+    q = "INSERT INTO test (name) VALUES ('aaa bbb')"
+    dbc.exew(q).commit()
+    assert dbc.exew('SELECT COUNT(*) FROM test').scalar() == 0
+
+    dbc.rollback()
+    assert dbc.exew('SELECT COUNT(*) FROM test').scalar() == 0
+
+
+def test_badqsql():
+    dbc.query_log = True
+    pytest.raises(sqlite3.OperationalError, dbc.exew, 'SELECT 1, 2, 3 FROM')
 
 
 def test_insert():
-    dbc.exes('DROP TABLE IF EXISTS test_insert').commit()
-    dbc.exes("""CREATE TABLE test_insert (
-             id integer primary key,
-             name text)""")
-    i = (dbc.exes('INSERT INTO test_insert VALUES (null, "name")')
-            .commit().lastid())
-    assert i == 1
-    dbc.exew('SELECT * FROM test_insert').first() == (1, 'name')
+    clear_table()
 
+    q = "INSERT INTO test (name) VALUES ('aaa bbb')"
+    dbc.exew(q).commit()
+    assert dbc.exew('SELECT COUNT(*) FROM test').scalar() == 0
+
+    dbc.exes(q).commit()
+    assert dbc.exew('SELECT COUNT(*) FROM test').scalar() == 1
+
+
+def test_scalar():
+    clear_table()
     pytest.raises(UnacceptableResultError,
-                  dbc.exew('SELECT * FROM test_insert WHERE id = 100').first,
+                  dbc.exew('SELECT 1 FROM test').scalar,
                   False)
 
 
-def test_update():
-    dbc.exes('DROP TABLE IF EXISTS test_update').commit()
-    dbc.exes("""CREATE TABLE test_update (
-             id integer primary key,
-             name text)""")
-    dbc.exes('INSERT INTO test_update VALUES (null,"name")').commit().lastid()
+def test_lastid():
+    clear_table()
+    q = "INSERT INTO test (name) VALUES ('aaa bbb')"
+    assert dbc.exes(q).commit().lastid() == 1
 
-    i = dbc.exes('UPDATE test_update SET name = "name2"').commit().rowcount()
-    assert i == 1
+    q = "UPDATE test SET name = 'aaa bbb'"
+    pytest.raises(UnacceptableResultError,
+                  dbc.exes(q).commit().lastid,
+                  False)
+
+
+def test_rowcount():
+    clear_table()
+    q = "INSERT INTO test (name) VALUES ('aaa bbb')"
+    dbc.exes(q).commit()
+
+    q = "UPDATE test SET name = 'aaa bbb'"
+    assert dbc.exes(q).commit().rowcount() == 1
+
+    q = "UPDATE test SET name = 'aaa bbb' WHERE id = 100"
+    assert dbc.exes(q).commit().rowcount() == 0
+
+
+def test_first():
+    clear_table()
+    assert dbc.exew('SELECT * FROM test').first() is None
+
+    q = "INSERT INTO test (name) VALUES ('aaa bbb')"
+    dbc.exes(q).commit()
+    assert dbc.exew('SELECT id FROM test').first() == {'id': 1}
+
+
+def test_all():
+    clear_table()
+    pytest.raises(UnacceptableResultError,
+                  dbc.exew('SELECT * FROM test').all,
+                  False)
+
+    q = "INSERT INTO test (name) VALUES ('aaa bbb')"
+    dbc.exes(q).commit()
+    assert dbc.exew('SELECT id FROM test').all() == [{'id': 1}]
