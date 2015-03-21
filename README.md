@@ -1,4 +1,0 @@
-sqlew
-==========
-
-DB client

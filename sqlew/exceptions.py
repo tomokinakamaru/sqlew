@@ -3,3 +3,11 @@
 
 class QueryFormatError(Exception):
     pass
+
+
+class IncompatibleTypeError(Exception):
+    pass
+
+
+class UnacceptableResultError(Exception):
+    pass

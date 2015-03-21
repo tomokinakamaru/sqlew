@@ -1,0 +1,8 @@
+[paths]
+source = sqlew
+
+[report]
+inclide = sqlew*
+
+[html]
+directory = .coverage-html

@@ -2,77 +2,48 @@
 
 
 class RestructableDict(dict):
-    def split(self, key, separator=','):
-        if self[key] is not None:
-            self[key] = self[key].split(separator)
+    def nest_dict(self, name, keymap):
+        d = {keymap[k]: self.pop(k) for k in keymap.keys()}
+        self[name] = RestructableDict(d)
+        return self
+
+    def nest_list(self, name, keymap, separator=','):
+        d = {keymap[k]: self.pop(k) for k in keymap.keys()}
+
+        ret = []
+        for k, v in d.items():
+            for i, e in enumerate(v.split(separator)):
+                if i < len(ret):
+                    ret[i][k] = e
+                else:
+                    ret.append({k: e})
+
+        self[name] = RestructableList(ret)
+        return self
+
+    def nest(self, name, separator=None):
+        keymap = {k: k[len(name)+1:]
+                  for k in self.keys() if k.startswith(name + '_')}
+
+        if separator is None:
+            return self.nest_dict(name, keymap)
 
         else:
-            self[key] = []
-
-        return self
-
-    def form_one(self, from_key, to_key):
-        from_keypath = from_key.split('.')
-        to_keypath = to_key.split('.')
-
-        dst_head = self
-        for k in to_keypath[:-1]:
-            dst_head = dst_head.setdefault(k, RestructableDict())
-
-        src_head = self
-        for k in from_keypath[:-1]:
-            src_head = src_head[k]
-
-        dst_head[to_keypath[-1]] = src_head[from_keypath[-1]]
-        del src_head[from_keypath[-1]]
-
-        return self
-
-    def form(self, from_prefix, to_prefix):
-        for k in self.keys():
-            if k.startswith(from_prefix):
-                suffix = k[len(from_prefix):]
-                to_key = '{}.{}'.format(to_prefix, suffix)
-                self.form_one(k, to_key)
-
-        return self
-
-    def transpose(self, key, separator=','):
-        ret = RestructableList()
-        for k, joined in self[key].items():
-            if joined is not None:
-                splited = joined.split(separator)
-                for i, v in enumerate(splited):
-                    if len(ret) < i+1:
-                        ret.append(RestructableDict())
-
-                    ret[i][k] = v
-        self[key] = ret
-
-        return self
+            return self.nest_list(name, keymap, separator)
 
 
 class RestructableList(list):
-    def split(self, key, separator=','):
+    def nest_dict(self, name, keymap):
         for e in self:
-            e.split(key, separator)
-
+            e.nest_dict(name, keymap)
         return self
 
-    def form_one(self, from_key, to_key):
+    def nest_list(self, name, keymap, separator=','):
         for e in self:
-            e.form_one(from_key, to_key)
-
+            e.nest_list(name, keymap, separator)
         return self
 
-    def form(self, from_prefix, to_prefix):
+    def nest(self, name, separator=None):
         for e in self:
-            e.form(from_prefix, to_prefix)
-
-        return self
-
-    def transform(self, key, separator=','):
-        for e in self:
-            e.transpose(key, separator)
-
+            e.nest(name, separator)
         return self
