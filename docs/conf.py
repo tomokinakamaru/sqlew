@@ -35,5 +35,5 @@ html_theme_options = {
     'github_banner': True,
     'github_button': False,
     'travis_button': True,
-    'analytics_id': ''
+    'analytics_id': 'UA-60884918-2'
 }
