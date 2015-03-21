@@ -6,8 +6,6 @@ from sqlew import Client
 from sqlew.exceptions import UnacceptableResultError
 
 dbc = Client(sqlite3, database='tests/test_db.db')
-dbc.exew('DROP TABLE IF EXISTS test')
-dbc.exew('CREATE TABLE test (id integer primary key, name test)')
 
 
 def clear_table():

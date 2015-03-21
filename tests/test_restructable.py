@@ -20,8 +20,5 @@ def test_nest_list():
     assert rl.nest('a', ',') == [{'a': [{'x': '1', 'y': '4'},
                                         {'x': '2', 'y': '5'}]}]
 
-
-def test_a():
     rl = RL([RD({'x': '1,2'})])
-    print('-- rl --', rl)
     assert rl.nest_list('a', {'x': '*'}) == [{'a': [{'*': '1'}, {'*': '2'}]}]
