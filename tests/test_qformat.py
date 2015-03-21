@@ -58,7 +58,8 @@ def test_list(ls, ret):
                          [({'a': 1, 'b': True, 'c': [1, 2]},
                            'a=1,c=(1,2),b=1')])
 def test_dict(d, ret):
-    assert queryformat.qformat(':d', d=d) == ret
+    for e in queryformat.qformat(':d', d=d).split(','):
+        assert e in ret.split(',')
 
 
 @pytest.mark.parametrize('f, ret',

@@ -2,6 +2,7 @@
 
 import re
 from datetime import datetime, date
+from . import compat
 from .exceptions import (QueryFormatError,
                          IncompatibleTypeError)
 
@@ -31,13 +32,13 @@ def qformat_object(v, escape=True, nested=False):
     if isinstance(v, bool):
         return '1' if v else '0'
 
-    if isinstance(v, (int, long, float)):
+    if compat.is_number(v):
         return str(v)
 
-    if isinstance(v, str):
-        return "'{}'".format(v.replace("'", "\\'")) if escape else v
+    if compat.is_non_unicode_string(v):
+        return qformat_object(v.decode('utf8'), escape, nested)
 
-    if isinstance(v, unicode):
+    if compat.is_unicode_string(v):
         return u"'{}'".format(v.replace(u"'", u"\\'")) if escape else v
 
     if v is None:
