@@ -73,6 +73,9 @@ def test_rowcount():
 
     q = "UPDATE test SET name = 'aaa bbb' WHERE id = 100"
     assert dbc.exes(q).commit().rowcount() == 0
+    pytest.raises(UnacceptableResultError,
+                  dbc.exes(q).commit().rowcount,
+                  False)
 
 
 def test_first():
