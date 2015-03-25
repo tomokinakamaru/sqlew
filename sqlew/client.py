@@ -104,10 +104,10 @@ class Client(object):
 
     def lastid(self, allow_zero=True):
         if allow_zero:
-            return self._rowcount or 0
+            return self._lastrowid or 0
 
         else:
-            return self._rowcount or self._unacceptable_result()
+            return self._lastrowid or self._unacceptable_result()
 
     def rowcount(self, allow_zero=True):
         if allow_zero:
