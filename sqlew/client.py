@@ -102,11 +102,19 @@ class Client(object):
         else:
             return None if allow_none else self._unacceptable_result()
 
-    def lastid(self, allow_none=True):
-        return self._lastrowid if allow_none else self._unacceptable_result()
+    def lastid(self, allow_zero=True):
+        if allow_zero:
+            return self._lastrowid or 0
 
-    def rowcount(self, allow_none=True):
-        return self._rowcount if allow_none else self._unacceptable_result()
+        else:
+            return self._lastrowid or self._unacceptable_result()
+
+    def rowcount(self, allow_zero=True):
+        if allow_zero:
+            return self._rowcount or 0
+
+        else:
+            return self._rowcount or self._unacceptable_result()
 
     def first(self, allow_none=True):
         if len(self._result_rows) > 0:

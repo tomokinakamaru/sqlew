@@ -12,11 +12,12 @@ class RestructableDict(dict):
 
         ret = []
         for k, v in d.items():
-            for i, e in enumerate(v.split(separator)):
-                if i < len(ret):
-                    ret[i][k] = e
-                else:
-                    ret.append({k: e})
+            if v is not None:
+                for i, e in enumerate(v.split(separator)):
+                    if i < len(ret):
+                        ret[i][k] = e
+                    else:
+                        ret.append({k: e})
 
         self[name] = RestructableList(ret)
         return self

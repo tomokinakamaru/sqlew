@@ -5,4 +5,4 @@ sqlew
     :target: https://travis-ci.org/tomokinakamaru/sqlew
     :alt: sqlew Build
 
-PEP 249 compat DB Client wrapper & query formatting.
+PEP 249 compat DB client wrapper & query formatting.

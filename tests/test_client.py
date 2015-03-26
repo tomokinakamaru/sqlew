@@ -57,9 +57,9 @@ def test_lastid():
     q = "INSERT INTO test (name) VALUES ('aaa bbb')"
     assert dbc.exes(q).commit().lastid() == 1
 
-    q = "UPDATE test SET name = 'aaa bbb'"
+    q = "SELECT * FROM test"
     pytest.raises(UnacceptableResultError,
-                  dbc.exes(q).commit().lastid,
+                  dbc.exew(q).commit().lastid,
                   False)
 
 
@@ -73,6 +73,9 @@ def test_rowcount():
 
     q = "UPDATE test SET name = 'aaa bbb' WHERE id = 100"
     assert dbc.exes(q).commit().rowcount() == 0
+    pytest.raises(UnacceptableResultError,
+                  dbc.exes(q).commit().rowcount,
+                  False)
 
 
 def test_first():
