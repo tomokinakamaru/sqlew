@@ -57,6 +57,11 @@ def test_lastid():
     q = "INSERT INTO test (name) VALUES ('aaa bbb')"
     assert dbc.exes(q).commit().lastid() == 1
 
+    q = "SELECT * FROM test"
+    pytest.raises(UnacceptableResultError,
+                  dbc.exew(q).commit().lastid,
+                  False)
+
 
 def test_rowcount():
     clear_table()
