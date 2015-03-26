@@ -17,20 +17,27 @@ class RestructableDict(dict):
                     if i < len(ret):
                         ret[i][k] = e
                     else:
-                        ret.append({k: e})
+                        ret.append(RestructableDict({k: e}))
 
         self[name] = RestructableList(ret)
         return self
 
     def nest(self, name, separator=None):
-        keymap = {k: k[len(name)+1:]
-                  for k in self.keys() if k.startswith(name + '_')}
-
-        if separator is None:
-            return self.nest_dict(name, keymap)
+        if isinstance(name, (list, tuple)):
+            target_name = name[-1]
+            target_dict = reduce(lambda d, k: d[k], [self] + list(name[:-1]))
+            target_dict.nest(target_name, separator)
+            return self
 
         else:
-            return self.nest_list(name, keymap, separator)
+            keymap = {k: k[len(name)+1:]
+                      for k in self.keys() if k.startswith(name + '_')}
+
+            if separator is None:
+                return self.nest_dict(name, keymap)
+
+            else:
+                return self.nest_list(name, keymap, separator)
 
 
 class RestructableList(list):
