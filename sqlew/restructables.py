@@ -22,7 +22,8 @@ class RestructableDict(dict):
         head, tail = keypath[0], keypath[1:]
 
         if len(keypath) == 1:
-            self[head] = RestructableList(self[head].split(','))
+            v = self[head].split(',') if self[head] is not None else []
+            self[head] = RestructableList(v)
 
         else:
             self[head].split(*tail)
@@ -34,7 +35,7 @@ class RestructableDict(dict):
 
         if len(keypath) == 1:
             keys = self[head].keys()
-            ls = [dict(zip(keys, e))
+            ls = [RestructableDict(dict(zip(keys, e)))
                   for e in compat.zip_longest(*self[head].values())]
             self[head] = RestructableList(ls)
 
