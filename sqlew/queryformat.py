@@ -28,7 +28,7 @@ def qformat(fmt, **kwargs):
         raise QueryFormatError(str(e))
 
 
-def qformat_object(v, escape=True, nested=False):
+def qformat_object_default(v, escape=True, nested=False):
     if isinstance(v, bool):
         return '1' if v else '0'
 
@@ -66,3 +66,6 @@ def qformat_object(v, escape=True, nested=False):
         return "'{}'".format(dt.strftime('%Y-%m-%d'))
 
     raise IncompatibleTypeError(v, escape, nested)
+
+
+qformat_object = qformat_object_default
