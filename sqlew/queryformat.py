@@ -65,4 +65,4 @@ def qformat_object(v, escape=True, nested=False):
         dt = datetime(v.year, v.month, v.day)
         return "'{}'".format(dt.strftime('%Y-%m-%d'))
 
-    raise IncompatibleTypeError(v)
+    raise IncompatibleTypeError(v, escape, nested)
