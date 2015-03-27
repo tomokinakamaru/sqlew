@@ -5,35 +5,50 @@ from . import compat
 
 class RestructableDict(dict):
     def nest(self, *keypath):
-        rst, name = self._find_target(*keypath)
-        keys = list(rst.keys())
-        d = {k[len(name)+1:]: rst.pop(k) for k in keys
-             if k.startswith(name + '_')}
-        rst[name] = RestructableDict(d)
+        head, tail = keypath[0], keypath[1:]
+
+        if len(keypath) == 1:
+            keys = list(self.keys())
+            d = {k[len(head)+1:]: self.pop(k) for k in keys
+                 if k.startswith(head + '_')}
+            self[head] = RestructableDict(d)
+
+        else:
+            self[head].nest(*tail)
+
         return self
 
     def split(self, *keypath):
-        rst, name = self._find_target(*keypath)
-        rst[name] = RestructableList(rst[name].split(','))
+        head, tail = keypath[0], keypath[1:]
+
+        if len(keypath) == 1:
+            self[head] = RestructableList(self[head].split(','))
+
+        else:
+            self[head].split(*tail)
+
         return self
 
     def invert(self, *keypath):
-        rst, name = self._find_target(*keypath)
-        keys = rst[name].keys()
-        ls = [dict(zip(keys, e))
-              for e in compat.zip_longest(*rst[name].values())]
-        rst[name] = RestructableList(ls)
+        head, tail = keypath[0], keypath[1:]
+
+        if len(keypath) == 1:
+            keys = self[head].keys()
+            ls = [dict(zip(keys, e))
+                  for e in compat.zip_longest(*self[head].values())]
+            self[head] = RestructableList(ls)
+
+        else:
+            self[head].invert(*tail)
+
         return self
 
     def nest_list(self, *keypath):
         self.nest(*keypath)
-        rst, name = self._find_target(*keypath)
-        for k in rst[name].keys():
-            rst[name].split(k)
+        rst = compat.keypath_value(self, *keypath)
+        for k in rst.keys():
+            rst.split(k)
         return self.invert(*keypath)
-
-    def _find_target(self, *keypath):
-        return compat.keypath_value(self, *keypath), keypath[-1]
 
 
 class RestructableList(list):

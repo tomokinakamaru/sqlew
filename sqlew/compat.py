@@ -18,7 +18,7 @@ if major == 2:
     zip_longest = izip_longest
 
     def keypath_value(dic, *keypath):
-        return reduce(lambda d, k: d.get(k), [dic] + list(keypath[:-1]))
+        return reduce(lambda d, k: d.get(k), [dic] + list(keypath))
 
 elif major == 3:
     def is_number(v):
@@ -35,4 +35,4 @@ elif major == 3:
     from functools import reduce
 
     def keypath_value(dic, *keypath):
-        return reduce(lambda d, k: d.get(k), [dic] + list(keypath[:-1]))
+        return reduce(lambda d, k: d.get(k), [dic] + list(keypath))
