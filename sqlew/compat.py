@@ -14,6 +14,12 @@ if major == 2:
     def is_non_unicode_string(v):
         return isinstance(v, (str, bytes, bytearray))
 
+    from itertools import izip_longest
+    zip_longest = izip_longest
+
+    def keypath_value(dic, *keypath):
+        return reduce(lambda d, k: d.get(k), [dic] + list(keypath[:-1]))
+
 elif major == 3:
     def is_number(v):
         return isinstance(v, (int, float))
@@ -23,3 +29,10 @@ elif major == 3:
 
     def is_non_unicode_string(v):
         return isinstance(v, (bytes, bytearray))
+
+    from itertools import zip_longest
+
+    from functools import reduce
+
+    def keypath_value(dic, *keypath):
+        return reduce(lambda d, k: d.get(k), [dic] + list(keypath[:-1]))

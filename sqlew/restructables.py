@@ -1,57 +1,58 @@
 # coding:utf-8
 
+from . import compat
+
 
 class RestructableDict(dict):
-    def nest_dict(self, name, keymap):
-        d = {keymap[k]: self.pop(k) for k in keymap.keys()}
-        self[name] = RestructableDict(d)
+    def nest(self, *keypath):
+        rst, name = self._find_target(*keypath)
+        keys = list(rst.keys())
+        d = {k[len(name)+1:]: rst.pop(k) for k in keys
+             if k.startswith(name + '_')}
+        rst[name] = RestructableDict(d)
         return self
 
-    def nest_list(self, name, keymap, separator=','):
-        d = {keymap[k]: self.pop(k) for k in keymap.keys()}
-
-        ret = []
-        for k, v in d.items():
-            if v is not None:
-                for i, e in enumerate(v.split(separator)):
-                    if i < len(ret):
-                        ret[i][k] = e
-                    else:
-                        ret.append(RestructableDict({k: e}))
-
-        self[name] = RestructableList(ret)
+    def split(self, *keypath):
+        rst, name = self._find_target(*keypath)
+        rst[name] = RestructableList(rst[name].split(','))
         return self
 
-    def nest(self, name, separator=None):
-        if isinstance(name, (list, tuple)):
-            target_name = name[-1]
-            target_dict = reduce(lambda d, k: d[k], [self] + list(name[:-1]))
-            target_dict.nest(target_name, separator)
-            return self
+    def invert(self, *keypath):
+        rst, name = self._find_target(*keypath)
+        keys = rst[name].keys()
+        ls = [dict(zip(keys, e))
+              for e in compat.zip_longest(*rst[name].values())]
+        rst[name] = RestructableList(ls)
+        return self
 
-        else:
-            keymap = {k: k[len(name)+1:]
-                      for k in self.keys() if k.startswith(name + '_')}
+    def nest_list(self, *keypath):
+        self.nest(*keypath)
+        rst, name = self._find_target(*keypath)
+        for k in rst[name].keys():
+            rst[name].split(k)
+        return self.invert(*keypath)
 
-            if separator is None:
-                return self.nest_dict(name, keymap)
-
-            else:
-                return self.nest_list(name, keymap, separator)
+    def _find_target(self, *keypath):
+        return compat.keypath_value(self, *keypath), keypath[-1]
 
 
 class RestructableList(list):
-    def nest_dict(self, name, keymap):
+    def nest(self, *keypath):
         for e in self:
-            e.nest_dict(name, keymap)
+            e.nest(*keypath)
         return self
 
-    def nest_list(self, name, keymap, separator=','):
+    def split(self, *keypath):
         for e in self:
-            e.nest_list(name, keymap, separator)
+            e.split(*keypath)
         return self
 
-    def nest(self, name, separator=None):
+    def invert(self, *keypath):
         for e in self:
-            e.nest(name, separator)
+            e.invert(*keypath)
+        return self
+
+    def nest_list(self, *keypath):
+        for e in self:
+            e.nest_list(*keypath)
         return self
