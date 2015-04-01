@@ -74,7 +74,7 @@ class Client(object):
         q = qformat(fmt, **kwargs)
 
         if self.query_log:
-            print('sqlew: {}'.format(q))
+            print(q)
 
         try:
             self.cursor().execute(q)
