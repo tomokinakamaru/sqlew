@@ -30,10 +30,10 @@ def qformat(fmt, **kwargs):
 
 def qformat_object_default(v, escape=True, nested=False):
     if isinstance(v, bool):
-        return '1' if v else '0'
+        return u'1' if v else u'0'
 
     if compat.is_number(v):
-        return str(v)
+        return compat.unicode_str(v)
 
     if compat.is_non_unicode_string(v):
         return qformat_object(v.decode('utf8'), escape, nested)
@@ -42,24 +42,24 @@ def qformat_object_default(v, escape=True, nested=False):
         return u"'{}'".format(v.replace(u"'", u"\\'")) if escape else v
 
     if v is None:
-        return 'NULL'
+        return u'NULL'
 
     if isinstance(v, (list, tuple, set)):
-        s = ','.join([qformat_object(e, escape, True) for e in v])
-        return '({})'.format(s) if nested else s
+        s = u','.join([qformat_object(e, escape, True) for e in v])
+        return u'({})'.format(s) if nested else s
 
     if isinstance(v, dict):
         d = {qformat_object(k, False, True): qformat_object(e, True, True)
              for k, e in v.items()}
-        return ','.join(['{}={}'.format(k, e) for k, e in d.items()])
+        return u','.join([u'{}={}'.format(k, e) for k, e in d.items()])
 
     if hasattr(v, '__call__'):
         r = v()
         fname, args = (r[0], r[1:]) if isinstance(r, tuple) else (r, ())
-        return '{}({})'.format(fname.upper(), qformat_object(args))
+        return u'{}({})'.format(fname.upper(), qformat_object(args))
 
     if isinstance(v, datetime):
-        return "'{}'".format(v.strftime('%Y-%m-%d %H:%M:%S'))
+        return u"'{}'".format(v.strftime('%Y-%m-%d %H:%M:%S'))
 
     if isinstance(v, date):
         dt = datetime(v.year, v.month, v.day)
