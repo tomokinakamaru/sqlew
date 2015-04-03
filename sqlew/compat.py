@@ -14,6 +14,9 @@ if major == 2:
     def is_non_unicode_string(v):
         return isinstance(v, (str, bytes, bytearray))
 
+    def unicode_str(v):
+        return unicode(v)
+
     from itertools import izip_longest
     zip_longest = izip_longest
 
@@ -29,6 +32,9 @@ elif major == 3:
 
     def is_non_unicode_string(v):
         return isinstance(v, (bytes, bytearray))
+
+    def unicode_str(v):
+        return str(v)
 
     from itertools import zip_longest
 
