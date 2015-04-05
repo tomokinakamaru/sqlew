@@ -132,7 +132,7 @@ class Client(object):
             return r
 
         else:
-            return [] if allow_empty else self._unacceptable_result()
+            return RL() if allow_empty else self._unacceptable_result()
 
     def _unacceptable_result(self):
         raise UnacceptableResultError()
