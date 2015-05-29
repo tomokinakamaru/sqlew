@@ -15,12 +15,11 @@ Examples
 
 .. sourcecode:: python
 
-    from sqew import Client
+    import sqlite3
+    from sqlew import Client
 
-    cli = Client(user='user',
-                 password='password',
-                 host='127.0.0.1',
-                 db='sqlew_test')
+    # sqlite sample
+    cli = Client(sqlite3, database='sqlew_test')
 
     # blog post data
     blog_post = {'title': 'My First Post',
@@ -35,7 +34,7 @@ Examples
     # > VALUES ('My First Post', 'Hello World', NOW())
     cli.exes(q,
              keys=blog_post.keys(),
-             vals=blog_post.vals).commit()
+             vals=blog_post.values()).commit()
 
     # select query
     q = 'SELECT * FROM blog_posts LIMIT :offset, 10'
