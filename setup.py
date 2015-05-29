@@ -30,5 +30,5 @@ setup(
     packages=find_packages(),
     platforms='any',
     url='http://github.com/tomokinakamaru/sqlew',
-    version='0.3.4'
+    version='1.0.0'
 )
