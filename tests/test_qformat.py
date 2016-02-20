@@ -81,6 +81,14 @@ def test_date():
     assert queryformat.qformat(':dt', dt=dt) == ret
 
 
+@pytest.mark.parametrize('ls, ret',
+                         [((v for v in [1, 2]), '1,2'),
+                          ((v for v in [1, [1, 2]]), '1,(1,2)'),
+                          ((v for v in [1, [1, [1, 2]]]), '1,(1,(1,2))')])
+def test_generator(ls, ret):
+    assert queryformat.qformat(':ls', ls=ls) == ret
+
+
 def test_incompat():
     pytest.raises(IncompatibleTypeError,
                   queryformat.qformat, ':o', o=object())
