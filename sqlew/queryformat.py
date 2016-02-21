@@ -1,5 +1,6 @@
 # coding:utf-8
 
+import inspect
 import re
 from datetime import datetime, date
 from . import compat
@@ -64,6 +65,9 @@ def qformat_object_default(v, escape=True, nested=False):
     if isinstance(v, date):
         dt = datetime(v.year, v.month, v.day)
         return "'{}'".format(dt.strftime('%Y-%m-%d'))
+
+    if inspect.isgenerator(v):
+        return qformat_object(list(v), escape, nested)
 
     raise IncompatibleTypeError(v, escape, nested)
 

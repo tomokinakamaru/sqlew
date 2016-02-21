@@ -2,7 +2,7 @@
 source = sqlew
 
 [report]
-inclide = sqlew*
+include = sqlew*
 
 [html]
 directory = .coverage-html
